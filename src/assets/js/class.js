@@ -3,7 +3,7 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-12 09:17:31
- * @LastEditTime: 2021-11-13 22:29:01
+ * @LastEditTime: 2021-11-14 00:42:46
  */
 import { base } from '../../config'
 
@@ -30,6 +30,15 @@ export class Block {
 
     this.elBlock.getCompare = () => {
       return this.elBlock.style.backgroundImage
+    }
+
+    this.elBlock.setPos = (x, y) => {
+      this.elBlock.x = x
+      this.elBlock.y = y
+      this.elBlock.posX = x * base.size + x * 2 * base.gap
+      this.elBlock.posY = y * base.size + y * 2 * base.gap
+      this.elBlock.style.top = this.elBlock.posY + 'px'
+      this.elBlock.style.left = this.elBlock.posX + 'px'
     }
   }
 }

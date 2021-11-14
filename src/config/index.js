@@ -3,7 +3,7 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-12 04:38:55
- * @LastEditTime: 2021-11-13 22:26:37
+ * @LastEditTime: 2021-11-15 01:15:58
  */
 
 export const configs = [
@@ -83,5 +83,5 @@ export const base = {
   defaultColor: '#03a9f4',
   size: 50,
   gap: 2,
-  picsLen: 4
+  picsLen: 3
 }

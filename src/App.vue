@@ -3,7 +3,7 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-11 18:24:18
- * @LastEditTime: 2021-11-12 09:11:49
+ * @LastEditTime: 2021-11-14 20:44:32
 -->
 
 <template>
@@ -18,6 +18,7 @@
 <script>
 import Login from 'views/Login'
 import GameWrap from 'views/GameWrap'
+import { toggleView } from 'assets/js/utils'
 export default {
   components: {
     Login,
@@ -25,16 +26,17 @@ export default {
   },
   methods: {
     enterGame() {
-      this.toggleView(this.$refs.login.$el, this.$refs.gameWrap.$el)
-    },
-    toggleView(...views) {
-      views.forEach((view) => view.classList.toggle('hidden'))
+      toggleView('hidden', this.$refs.login.$el, this.$refs.gameWrap.$el)
     }
+    // toggleView(...views) {
+    //   views.forEach((view) => view.classList.toggle('hidden'))
+    // }
   }
 }
 </script>
 
 <style lang="less">
+@import '~assets/styles/common.less';
 * {
   margin: 0;
   padding: 0;
