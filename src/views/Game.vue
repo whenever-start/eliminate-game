@@ -3,7 +3,7 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-12 00:00:00
- * @LastEditTime: 2021-11-15 01:38:34
+ * @LastEditTime: 2021-11-18 12:13:00
 -->
 
 <template>
@@ -84,13 +84,15 @@ export default {
           this.swap(this.prevBlock, elBlock)
           let matches2 = this.canMatch(elBlock)
           let matches1 = this.canMatch(this.prevBlock)
+          let bothMatch = this.multiCanMatch(elBlock, this.prevBlock)
 
           if (!matches1 && !matches2) {
             await wait(this.delay)
             this.swap(elBlock, this.prevBlock)
           } else if (matches1 && matches2) {
-            this.eliminate(matches1)
-            this.eliminate(matches2)
+            // this.eliminate(matches1)
+            // this.eliminate(matches2)
+            this.eliminate(bothMatch)
           } else if (matches1) {
             this.eliminate(matches1)
           } else if (matches2) {
@@ -119,7 +121,7 @@ export default {
      * @param {Array} matches 匹配元素的数组
      * @return {*}
      */
-    async eliminate(matches) {
+    async eliminate(match) {
       // eliminate 音效
       let sources = [
         require('assets/music/eliminate1.mp3'),
@@ -141,111 +143,91 @@ export default {
       // 消除期间禁止点击,消除结束再解绑
       this.$refs.game.classList.add('disabled')
       // 任务：处理 dom + 更新 elsBlocks
-      const fillXSet = {} // 补充方块的 x(列) 集合
+      const fillElements = {} // 补充方块的 x(列) 集合
       const xSet = {} // x(列)集合
-      const elGame = this.$refs.game
 
-      // 消除前等待
-      await wait(this.delay)
-      matches.forEach((elBlock) => {
-        // 移除 dom 元素
-        console.log('元素', elBlock.parentNode === elGame)
-        elGame.removeChild(elBlock)
-        eliminateSound.play()
-        // xSet
+      // xSet
+      match.forEach((elBlock) => {
         if (xSet[elBlock.x]) {
-          xSet[elBlock.x].push(elBlock)
+          xSet[elBlock.x].push(elBlock.y)
         } else {
-          xSet[elBlock.x] = [elBlock]
-        }
-        // 补充 dom 元素
-        const newBlock = this.createBlock(elBlock.x, -xSet[elBlock.x].length)
-        newBlock.setCompare()
-        console.log('new block', newBlock.parentNode === elGame)
-        // fillXSet
-        if (fillXSet[elBlock.x]) {
-          fillXSet[elBlock.x].push(newBlock)
-        } else {
-          fillXSet[elBlock.x] = [newBlock]
+          xSet[elBlock.x] = [elBlock.y]
         }
       })
-
-      // xSet 降序
+      // y 值降序
       for (let x in xSet) {
-        // x = parseInt(x)
-        xSet[x].sort((a, b) => b.y - a.y)
+        xSet[x].sort((a, b) => b - a)
       }
 
-      // 掉落前等待
-      await wait(this.delay)
-
-      // 处理掉落和更新 elsBlocks
+      // opacity=0 + 上移 + fill
       Object.keys(xSet).forEach((x) => {
         x = parseInt(x)
-        let botY = xSet[x][0].y // 最下边的方块
+        xSet[x].forEach((y, idx) => {
+          const elBlock = this.elsBlocks[x][y]
+          elBlock.style.opacity = 0
+          eliminateSound.play()
+          elBlock.setPos(x, -xSet[x].length + idx)
+          if (fillElements[x]) {
+            fillElements[x].push(elBlock)
+          } else {
+            fillElements[x] = [elBlock]
+          }
+        })
+      })
 
-        // 掉落(不包含新补充的方块)
+      await wait(this.delay)
+
+      // 掉落
+      Object.keys(xSet).forEach((x) => {
+        x = parseInt(x)
+        let botY = xSet[x][0]
+
         for (let y = botY - 1; y >= 0; y--) {
-          if (xSet[x].indexOf(this.elsBlocks[x][y]) === -1) {
+          if (xSet[x].indexOf(y) === -1) {
             this.elsBlocks[x][y].setPos(x, botY--)
           }
         }
-        // 新补充的方块掉落
-        fillXSet[x].forEach((elBlock, idx) => {
-          elBlock.setPos(x, fillXSet[x].length - 1 - idx)
-        })
 
-        // 更新 elsBlocks
-        xSet[x].reverse().forEach((elBlock, idx) => {
-          this.elsBlocks[x].splice(elBlock.y, 1)
-          this.elsBlocks[x].unshift(fillXSet[x][idx])
+        fillElements[x].forEach((elBlock, idx) => {
+          elBlock.style.opacity = 1
+          elBlock.setCompare()
+          elBlock.setPos(x, idx)
         })
       })
 
-      // 再判断前等待
-      await wait(this.delay)
-
-      // 掉落后再判断和消除
-      const mergeMatches = []
-      let len = 0
-      this.elsBlocks.forEach((cols) => {
-        cols.forEach((el) => {
-          len++
-          console.log('els blocks', len, el.parentNode === elGame)
-        })
-      })
-
+      // 更新 elsBlocks
       Object.keys(xSet).forEach((x) => {
         x = parseInt(x)
-        let botY = xSet[x][xSet[x].length - 1].y // 最下边的方块
+        let len = xSet[x].length
+        for (let i = len - 1; i >= 0; i--) {
+          this.elsBlocks[x].splice(xSet[x][i], 1)
+          this.elsBlocks[x].unshift(fillElements[x][i])
+        }
+      })
+
+      // 再判断
+      const mergeMatch = []
+      Object.keys(xSet).forEach((x) => {
+        x = parseInt(x)
+        let botY = xSet[x][0]
 
         for (let y = botY; y >= 0; y--) {
-          const matches = this.canMatch(this.elsBlocks[x][y])
-
-          if (matches) {
-            matches.forEach((el, idx) => {
-              console.log('matches:', idx, el.parentNode === elGame)
-              if (mergeMatches.indexOf(el) === -1) {
-                mergeMatches.push(el)
-                console.log(
-                  'push:',
-                  idx,
-                  mergeMatches[mergeMatches.length - 1].parentNode === elGame
-                )
+          const newMatch = this.canMatch(this.elsBlocks[x][y])
+          if (newMatch) {
+            newMatch.forEach((elBlock) => {
+              if (mergeMatch.indexOf(elBlock) === -1) {
+                mergeMatch.push(elBlock)
               }
             })
           }
         }
       })
-      if (mergeMatches.length) {
-        mergeMatches.forEach((el) =>
-          console.log('merge 元素', el.parentNode === elGame, el.parentNode)
-        )
-        // await wait(this.delay)
 
-        this.eliminate(mergeMatches)
+      await wait(this.delay)
+
+      if (mergeMatch.length) {
+        this.eliminate(mergeMatch)
       } else {
-        // 消除结束,解绑
         this.$refs.game.classList.remove('disabled')
         this.eliminateTimes = -1
       }
@@ -348,6 +330,21 @@ export default {
       }
 
       return matches.length ? matches : false
+    },
+
+    multiCanMatch(...els) {
+      const mergeMatch = []
+      els.forEach((el) => {
+        const newMatch = this.canMatch(el)
+        if (newMatch) {
+          newMatch.forEach((elBlock) => {
+            if (mergeMatch.indexOf(elBlock) === -1) {
+              mergeMatch.push(elBlock)
+            }
+          })
+        }
+      })
+      return mergeMatch.length ? mergeMatch : false
     }
   },
   mounted() {
@@ -361,8 +358,6 @@ export default {
   position: relative;
   margin: 20px auto 0;
   overflow: hidden;
-  // border: 1px solid #000;
-  // background-color: #35acff;
 
   .block {
     position: absolute;
@@ -370,9 +365,10 @@ export default {
     background-position: center;
     background-repeat: no-repeat;
     background-size: 140%;
-    background-color: @main-color;
     background-color: rgba(60, 60, 60, 0.6);
-    transition: 0.3s;
+    // transition: 0.3s;
+    transition-property: top, left, right, bottom;
+    transition-duration: 0.3s;
 
     &.active {
       background-color: @main-color;

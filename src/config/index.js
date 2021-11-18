@@ -3,16 +3,27 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-12 04:38:55
- * @LastEditTime: 2021-11-15 01:15:58
+ * @LastEditTime: 2021-11-17 00:39:52
  */
 
 export const configs = [
   {
     label: 1,
     lenY: 6,
-    lenX: 5,
+    lenX: 6,
     count: 10,
-    time: 60
+    time: 60,
+    step: 30,
+    task: [
+      {
+        target: 0,
+        count: 20
+      },
+      {
+        target: 1,
+        count: 20
+      }
+    ]
   },
   {
     label: 2,
@@ -81,7 +92,7 @@ export const configs = [
 
 export const base = {
   defaultColor: '#03a9f4',
-  size: 50,
+  size: 40,
   gap: 2,
   picsLen: 3
 }

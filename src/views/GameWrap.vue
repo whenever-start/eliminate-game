@@ -3,11 +3,11 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-12 00:24:23
- * @LastEditTime: 2021-11-13 22:08:15
+ * @LastEditTime: 2021-11-15 08:41:44
 -->
 <template>
   <div class="game-wrap">
-    <GameTopbar @choose="chooseLevel" />
+    <GameTopbar :level="level" @choose="chooseLevel" />
     <Game ref="game" />
     <!-- 关卡 弹窗 -->
     <el-dialog title="关卡" :visible.sync="dialogVisible" width="100%">
@@ -34,7 +34,8 @@ export default {
   data() {
     return {
       dialogVisible: false,
-      configs: configs
+      configs: configs,
+      level: 0
     }
   },
   methods: {
