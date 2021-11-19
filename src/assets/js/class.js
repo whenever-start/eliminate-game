@@ -3,9 +3,9 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-12 09:17:31
- * @LastEditTime: 2021-11-14 00:42:46
+ * @LastEditTime: 2021-11-20 00:41:49
  */
-import { base } from '../../config'
+import { base, compares } from '../../config'
 
 export class Block {
   constructor(x, y) {
@@ -23,9 +23,7 @@ export class Block {
 
     this.elBlock.setCompare = () => {
       let idx = random(0, base.picsLen)
-      let src = 'url(' + require(`assets/img/${idx}.png`) + ')'
-
-      this.elBlock.style.backgroundImage = src
+      this.elBlock.style.backgroundImage = `url(${compares[idx]})`
     }
 
     this.elBlock.getCompare = () => {

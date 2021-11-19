@@ -3,14 +3,22 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-12 00:00:00
- * @LastEditTime: 2021-11-18 12:13:00
+ * @LastEditTime: 2021-11-20 00:20:26
 -->
 
 <template>
   <div class="game" ref="game"></div>
 </template>
 <script>
-import { configs, base } from '../config'
+import {
+  configs,
+  base,
+  eliminateSources,
+  matchSources,
+  clickSource,
+  dropSource,
+  swapSource
+} from '../config'
 import { Block } from 'assets/js/class'
 import { wait } from 'assets/js/utils'
 
@@ -74,9 +82,8 @@ export default {
     },
 
     async click(elBlock) {
-      let src = require('assets/music/click.bubble.mp3')
-      const sound = new Audio(src)
-      sound.play()
+      const clickSound = new Audio(clickSource)
+
       if (this.prevBlock) {
         // prev 存在
         if (this.isClosed(this.prevBlock, elBlock)) {
@@ -90,8 +97,6 @@ export default {
             await wait(this.delay)
             this.swap(elBlock, this.prevBlock)
           } else if (matches1 && matches2) {
-            // this.eliminate(matches1)
-            // this.eliminate(matches2)
             this.eliminate(bothMatch)
           } else if (matches1) {
             this.eliminate(matches1)
@@ -102,6 +107,7 @@ export default {
           this.toggleActive(null, this.prevBlock)
         } else {
           // 不相邻
+          clickSound.play()
           if (this.prevBlock === elBlock) {
             // 同一个
             this.toggleActive(null, this.prevBlock)
@@ -112,6 +118,7 @@ export default {
         }
       } else {
         // prev 不存在
+        clickSound.play()
         this.toggleActive(elBlock, elBlock)
       }
     },
@@ -122,29 +129,22 @@ export default {
      * @return {*}
      */
     async eliminate(match) {
-      // eliminate 音效
-      let sources = [
-        require('assets/music/eliminate1.mp3'),
-        require('assets/music/eliminate2.mp3'),
-        require('assets/music/eliminate3.mp3'),
-        require('assets/music/eliminate4.mp3'),
-        require('assets/music/eliminate5.mp3'),
-        require('assets/music/eliminate6.mp3'),
-        require('assets/music/eliminate7.mp3'),
-        require('assets/music/eliminate8.mp3')
-      ]
-      this.eliminateTimes =
-        this.eliminateTimes < sources.length - 1
-          ? this.eliminateTimes + 1
-          : sources.length - 1
+      const dropSound = new Audio(dropSource)
+      const fillElements = {} // 补充方块的 x(列) 集合
+      const xSet = {} // x(列)集合
 
-      const eliminateSound = new Audio(sources[this.eliminateTimes])
+      // eliminate 音效
+      this.eliminateTimes++
+
+      let eliminateSrc =
+        this.eliminateTimes < eliminateSources.length - 1
+          ? this.eliminateTimes
+          : eliminateSources.length - 1
+
+      const eliminateSound = new Audio(eliminateSources[eliminateSrc])
 
       // 消除期间禁止点击,消除结束再解绑
       this.$refs.game.classList.add('disabled')
-      // 任务：处理 dom + 更新 elsBlocks
-      const fillElements = {} // 补充方块的 x(列) 集合
-      const xSet = {} // x(列)集合
 
       // xSet
       match.forEach((elBlock) => {
@@ -195,6 +195,8 @@ export default {
         })
       })
 
+      dropSound.play()
+
       // 更新 elsBlocks
       Object.keys(xSet).forEach((x) => {
         x = parseInt(x)
@@ -228,6 +230,24 @@ export default {
       if (mergeMatch.length) {
         this.eliminate(mergeMatch)
       } else {
+        let src = ''
+        if (this.eliminateTimes >= 3 && this.eliminateTimes < 5) {
+          src = matchSources[0]
+        } else if (this.eliminateTimes >= 5 && this.eliminateTimes < 7) {
+          src = matchSources[1]
+        } else if (this.eliminateTimes >= 7 && this.eliminateTimes < 9) {
+          src = matchSources[2]
+        } else if (this.eliminateTimes >= 9 && this.eliminateTimes < 11) {
+          src = matchSources[3]
+        } else if (this.eliminateTimes >= 11) {
+          src = matchSources[4]
+        }
+        console.log('次数:', this.eliminateTimes)
+        if (src) {
+          const matchSound = new Audio(src)
+          console.log('src', this.eliminateTimes, src)
+          matchSound.play()
+        }
         this.$refs.game.classList.remove('disabled')
         this.eliminateTimes = -1
       }
@@ -254,6 +274,8 @@ export default {
 
     // 交换
     swap(el1, el2) {
+      const swapSound = new Audio(swapSource)
+      swapSound.play()
       let x1 = el1.x
       let y1 = el1.y
       let x2 = el2.x

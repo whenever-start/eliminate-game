@@ -3,7 +3,7 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-12 04:38:55
- * @LastEditTime: 2021-11-17 00:39:52
+ * @LastEditTime: 2021-11-20 01:45:55
  */
 
 export const configs = [
@@ -16,11 +16,11 @@ export const configs = [
     step: 30,
     task: [
       {
-        target: 0,
+        compare: 0,
         count: 20
       },
       {
-        target: 1,
+        compare: 1,
         count: 20
       }
     ]
@@ -96,3 +96,35 @@ export const base = {
   gap: 2,
   picsLen: 3
 }
+
+export const compares = [
+  require('assets/img/0.png'),
+  require('assets/img/1.png'),
+  require('assets/img/2.png'),
+  require('assets/img/3.png')
+]
+
+export const eliminateSources = [
+  require('assets/music/eliminate1.mp3'),
+  require('assets/music/eliminate2.mp3'),
+  require('assets/music/eliminate3.mp3'),
+  require('assets/music/eliminate4.mp3'),
+  require('assets/music/eliminate5.mp3'),
+  require('assets/music/eliminate6.mp3'),
+  require('assets/music/eliminate7.mp3'),
+  require('assets/music/eliminate8.mp3')
+]
+
+export const matchSources = [
+  require('assets/music/match3.mp3'),
+  require('assets/music/match5.mp3'),
+  require('assets/music/match7.mp3'),
+  require('assets/music/match9.mp3'),
+  require('assets/music/match11.mp3')
+]
+
+export const dropSource = require('assets/music/drop.mp3')
+
+export const swapSource = require('assets/music/swap.mp3')
+
+export const clickSource = require('assets/music/click.mp3')
