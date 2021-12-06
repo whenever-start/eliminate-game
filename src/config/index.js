@@ -9,84 +9,66 @@
 export const configs = [
   {
     label: 1,
-    lenY: 6,
     lenX: 6,
+    lenY: 6,
     count: 10,
-    time: 60,
     step: 30,
     task: [
       {
-        compare: 0,
-        count: 20
+        compare: 'chicken',
+        count: 10
       },
       {
-        compare: 1,
-        count: 20
+        compare: 'pig',
+        count: 10
       }
     ]
   },
   {
     label: 2,
-    lenY: 6,
-    lenX: 5,
+    lenX: 7,
+    lenY: 8,
     count: 10,
-    time: 60
+    step: 30,
+    task: [
+      {
+        compare: 'chicken',
+        count: 10
+      },
+      {
+        compare: 'pig',
+        count: 10
+      },
+      {
+        compare: 'cat',
+        count: 10
+      }
+    ]
   },
   {
     label: 3,
-    lenY: 6,
-    lenX: 6,
-    count: 10,
-    time: 60
-  },
-  {
-    label: 4,
-    lenY: 6,
-    lenX: 6,
-    count: 10,
-    time: 60
-  },
-  {
-    label: 5,
-    lenY: 7,
-    lenX: 6,
-    count: 10,
-    time: 60
-  },
-  {
-    label: 6,
-    lenY: 7,
-    lenX: 6,
-    count: 10,
-    time: 60
-  },
-  {
-    label: 7,
-    lenY: 8,
-    lenX: 6,
-    count: 10,
-    time: 60
-  },
-  {
-    label: 8,
-    lenY: 8,
-    lenX: 6,
-    count: 10,
-    time: 60
-  },
-  {
-    label: 9,
-    lenY: 8,
     lenX: 7,
+    lenY: 10,
     count: 10,
-    time: 60
-  },
-  {
-    label: 10,
-    lenY: 8,
-    lenX: 7,
-    count: 10,
-    time: 60
+    step: 30,
+    task: [
+      {
+        compare: 'chicken',
+        count: 10
+      },
+      {
+        compare: 'pig',
+        count: 10
+      },
+      {
+        compare: 'cat',
+        count: 10
+      },
+      {
+        compare: 'sheep',
+        count: 10
+      }
+    ]
   }
 ]
 
@@ -94,15 +76,17 @@ export const base = {
   defaultColor: '#03a9f4',
   size: 40,
   gap: 2,
-  picsLen: 3
+  picsLen: 4
 }
 
-export const compares = [
-  require('assets/img/0.png'),
-  require('assets/img/1.png'),
-  require('assets/img/2.png'),
-  require('assets/img/3.png')
-]
+export const compares = ['chicken', 'sheep', 'pig', 'cat']
+
+export const comparesSrc = {
+  chicken: require('assets/img/0.png'),
+  sheep: require('assets/img/1.png'),
+  pig: require('assets/img/2.png'),
+  cat: require('assets/img/3.png')
+}
 
 export const eliminateSources = [
   require('assets/music/eliminate1.mp3'),

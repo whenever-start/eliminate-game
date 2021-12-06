@@ -11,7 +11,6 @@
 </template>
 <script>
 import {
-  configs,
   base,
   eliminateSources,
   matchSources,
@@ -21,24 +20,58 @@ import {
 } from '../config'
 import { Block } from 'assets/js/class'
 import { wait } from 'assets/js/utils'
+import _ from 'lodash'
 
 export default {
   name: 'Game',
   data() {
     return {
-      level: 0,
       elsBlocks: [],
       prevBlock: null,
       // 消除次数
       eliminateTimes: -1,
-      delay: 300
+      delay: 300,
+      step: 0,
+      task: _.cloneDeep(this.config.task)
     }
+  },
+  props: {
+    config: {
+      type: Object,
+      required: true
+    }
+  },
+  created() {
+    this.initData()
+  },
+  mounted() {
+    this.initGame(this.config)
   },
   methods: {
     initGame(config) {
       this.initStyle(config)
       this.initBlocks(config)
       this.initCompares()
+    },
+
+    initData() {
+      this.step = this.config.step
+      this.$nextTick(() => {
+        this.task = [..._.cloneDeep(this.config.task)]
+      })
+    },
+
+    restartGame() {
+      this.initData()
+      this.initCompares()
+    },
+
+    nextGame() {
+      this.$refs.game.innerHTML = ''
+      this.initData()
+      this.$nextTick(() => {
+        this.initGame(this.config)
+      })
     },
 
     initCompares() {
@@ -102,6 +135,11 @@ export default {
             this.eliminate(matches1)
           } else if (matches2) {
             this.eliminate(matches2)
+          }
+
+          // step
+          if (matches1 || matches2) {
+            this.updateStep()
           }
 
           this.toggleActive(null, this.prevBlock)
@@ -175,6 +213,8 @@ export default {
         })
       })
 
+      this.taskCount(match)
+
       await wait(this.delay)
 
       // 掉落
@@ -230,26 +270,36 @@ export default {
       if (mergeMatch.length) {
         this.eliminate(mergeMatch)
       } else {
-        let src = ''
-        if (this.eliminateTimes >= 3 && this.eliminateTimes < 5) {
-          src = matchSources[0]
-        } else if (this.eliminateTimes >= 5 && this.eliminateTimes < 7) {
-          src = matchSources[1]
-        } else if (this.eliminateTimes >= 7 && this.eliminateTimes < 9) {
-          src = matchSources[2]
-        } else if (this.eliminateTimes >= 9 && this.eliminateTimes < 11) {
-          src = matchSources[3]
-        } else if (this.eliminateTimes >= 11) {
-          src = matchSources[4]
-        }
-        console.log('次数:', this.eliminateTimes)
-        if (src) {
-          const matchSound = new Audio(src)
-          console.log('src', this.eliminateTimes, src)
-          matchSound.play()
-        }
-        this.$refs.game.classList.remove('disabled')
-        this.eliminateTimes = -1
+        this.eliminateEnded()
+      }
+    },
+
+    playMatchSound() {
+      let src = ''
+      if (this.eliminateTimes >= 3 && this.eliminateTimes < 5) {
+        src = matchSources[0]
+      } else if (this.eliminateTimes >= 5 && this.eliminateTimes < 7) {
+        src = matchSources[1]
+      } else if (this.eliminateTimes >= 7 && this.eliminateTimes < 9) {
+        src = matchSources[2]
+      } else if (this.eliminateTimes >= 9 && this.eliminateTimes < 11) {
+        src = matchSources[3]
+      } else if (this.eliminateTimes >= 11) {
+        src = matchSources[4]
+      }
+      if (src) {
+        const matchSound = new Audio(src)
+        matchSound.play()
+      }
+    },
+
+    eliminateEnded() {
+      this.playMatchSound()
+      this.$refs.game.classList.remove('disabled')
+      this.eliminateTimes = -1
+      if (this.task.every((item) => item.count === 0)) {
+        // 游戏成功
+        this.$emit('game-success', true) // true: 游戏成功 false: 失败
       }
     },
 
@@ -307,30 +357,24 @@ export default {
       let leftX = x - 1
       let rightX = x + 1
 
-      while (
-        upY >= 0 &&
-        el.getCompare() === this.elsBlocks[x][upY].getCompare()
-      ) {
+      while (upY >= 0 && el.compare === this.elsBlocks[x][upY].compare) {
         upY--
       }
 
       while (
-        downY < configs[this.level].lenY &&
-        el.getCompare() === this.elsBlocks[x][downY].getCompare()
+        downY < this.config.lenY &&
+        el.compare === this.elsBlocks[x][downY].compare
       ) {
         downY++
       }
 
-      while (
-        leftX >= 0 &&
-        el.getCompare() === this.elsBlocks[leftX][y].getCompare()
-      ) {
+      while (leftX >= 0 && el.compare === this.elsBlocks[leftX][y].compare) {
         leftX--
       }
 
       while (
-        rightX < configs[this.level].lenX &&
-        el.getCompare() === this.elsBlocks[rightX][y].getCompare()
+        rightX < this.config.lenX &&
+        el.compare === this.elsBlocks[rightX][y].compare
       ) {
         rightX++
       }
@@ -367,10 +411,24 @@ export default {
         }
       })
       return mergeMatch.length ? mergeMatch : false
+    },
+
+    taskCount(match) {
+      this.task.map((item, idx) => {
+        match.forEach((elBlock) => {
+          if (item.compare === elBlock.compare) {
+            if (item.count > 0) {
+              item.count--
+              this.$emit('update-count', idx)
+            }
+          }
+        })
+      })
+    },
+
+    updateStep() {
+      this.$emit('update-step', --this.step)
     }
-  },
-  mounted() {
-    this.initGame(configs[this.level])
   }
 }
 </script>
@@ -388,7 +446,6 @@ export default {
     background-repeat: no-repeat;
     background-size: 140%;
     background-color: rgba(60, 60, 60, 0.6);
-    // transition: 0.3s;
     transition-property: top, left, right, bottom;
     transition-duration: 0.3s;
 

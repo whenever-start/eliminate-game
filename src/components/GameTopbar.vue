@@ -3,7 +3,7 @@
  * @Author: FXF
  * @LastEditors: FXF
  * @Date: 2021-11-12 00:17:38
- * @LastEditTime: 2021-11-20 02:26:20
+ * @LastEditTime: 2021-11-20 02:30:50
 -->
 
 <template>
@@ -36,39 +36,24 @@
   </div>
 </template>
 <script>
-import { configs, compares } from '../config'
+import { compares, comparesSrc } from '../config'
 export default {
   name: 'GameTopbar',
   data() {
     return {
-      // task: configs[this.level].task,
-      // step: configs[this.level].step
       compares: compares
     }
   },
-  computed: {
-    task() {
-      return configs[this.level].task
-    },
-    step() {
-      return configs[this.level].step
-    }
-    // taskStyle() {
-    //   console.log(
-    //     '参数:',
-    //     this.level,
-    //     configs[this.level],
-    //     configs[this.level].task,
-    //     configs[this.level].task.compare
-    //   )
-    //   let src = compares[configs[this.level].task[0].compare]
-    //   return {
-    //     backgroundImage: `url(${src})`
-    //   }
-    // }
-  },
   props: {
     level: {
+      type: Number,
+      required: true
+    },
+    task: {
+      type: Array,
+      required: true
+    },
+    step: {
       type: Number,
       required: true
     }
@@ -78,7 +63,7 @@ export default {
       this.$emit('choose')
     },
     taskStyle(idx) {
-      let src = compares[configs[this.level].task[idx].compare]
+      let src = comparesSrc[this.task[idx].compare]
       return {
         backgroundImage: `url(${src})`
       }
@@ -88,7 +73,6 @@ export default {
 </script>
 <style lang="less">
 .round-box {
-  // padding: 10px;
   background-color: #ff9074;
   border-radius: 19px;
   height: 38px;

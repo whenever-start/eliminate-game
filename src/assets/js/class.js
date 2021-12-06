@@ -5,7 +5,7 @@
  * @Date: 2021-11-12 09:17:31
  * @LastEditTime: 2021-11-20 00:41:49
  */
-import { base, compares } from '../../config'
+import { base, compares, comparesSrc } from '../../config'
 
 export class Block {
   constructor(x, y) {
@@ -19,16 +19,20 @@ export class Block {
     this.elBlock.style.left = this.elBlock.posX + 'px'
     this.elBlock.style.width = base.size + 'px'
     this.elBlock.style.height = base.size + 'px'
+    this.elBlock.compare = null
     // this.elBlock.innerHTML = x + ' ' + y
 
     this.elBlock.setCompare = () => {
       let idx = random(0, base.picsLen)
-      this.elBlock.style.backgroundImage = `url(${compares[idx]})`
+      // this.elBlock.style.backgroundImage = `url(${compares[idx]})`
+      this.elBlock.compare = compares[idx]
+      this.elBlock.style.backgroundImage = `url(${comparesSrc[compares[idx]]})`
     }
 
-    this.elBlock.getCompare = () => {
-      return this.elBlock.style.backgroundImage
-    }
+    // this.elBlock.getCompare = () => {
+    //   // return this.elBlock.style.backgroundImage
+    //   return this.elBlock.compare
+    // }
 
     this.elBlock.setPos = (x, y) => {
       this.elBlock.x = x

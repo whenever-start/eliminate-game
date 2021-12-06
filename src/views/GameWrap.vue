@@ -7,15 +7,32 @@
 -->
 <template>
   <div class="game-wrap">
-    <GameTopbar :level="level" @choose="chooseLevel" />
-    <Game ref="game" />
+    <GameTopbar :level="level" :task="task" :step="step" />
+
+    <Game
+      ref="game"
+      :config="config"
+      @update-step="updateStep"
+      @update-count="updateCount"
+      @game-success="finishBox"
+    />
+
     <!-- 关卡 弹窗 -->
-    <el-dialog title="关卡" :visible.sync="dialogVisible" width="100%">
-      <ul class="choose-list">
-        <li class="item" v-for="item in configs" :key="item.label">
-          {{ item.label }}
-        </li>
-      </ul>
+    <el-dialog
+      :title="succeed ? '游戏成功' : '游戏失败'"
+      :visible.sync="dialogVisible"
+      :close-on-click-modal="false"
+      :show-close="false"
+      :center="true"
+      width="100%"
+    >
+      <div class="finish-box" v-if="succeed">
+        <el-button type="info" @click="restart">重玩一局</el-button>
+        <el-button type="primary" @click="nextGame">下一关</el-button>
+      </div>
+      <div class="finish-box" v-else>
+        <el-button type="primary" @click="restart">重来一次</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -23,7 +40,9 @@
 import GameTopbar from 'components/GameTopbar'
 import Game from 'views/Game'
 
-import { configs, base } from '../config'
+import _ from 'lodash'
+import { configs } from '../config'
+import { get, set } from 'assets/js/store'
 console.log('configs', configs)
 
 export default {
@@ -34,21 +53,58 @@ export default {
   data() {
     return {
       dialogVisible: false,
-      configs: configs,
-      level: 0
+      configs: [],
+      level: 0, // level = 0 : 第一关
+      step: 0,
+      succeed: false
+    }
+  },
+  computed: {
+    task() {
+      return this.configs[this.level].task
+    },
+    config() {
+      return this.configs[this.level]
+    }
+  },
+  created() {
+    this.initData()
+    this.level = get('level', 0)
+    if (this.level >= configs.length) {
+      this.level = 0
+      set('level', this.level)
     }
   },
   methods: {
-    chooseLevel() {
+    initData() {
+      this.configs = _.cloneDeep(configs)
+      this.step = this.configs[this.level].step
+    },
+    updateStep(step) {
+      this.step = step
+    },
+    updateCount(idx) {
+      this.configs[this.level].task[idx].count--
+    },
+    restart() {
+      this.initData()
+      this.$refs.game.restartGame()
+      this.dialogVisible = false
+    },
+    nextGame() {
+      this.initData()
+      this.level = this.level < configs.length - 1 ? this.level + 1 : 0
+      set('level', this.level)
+      this.$refs.game.nextGame()
+      this.dialogVisible = false
+    },
+    finishBox(succeed) {
+      this.succeed = succeed
       this.dialogVisible = true
     }
-  },
-  mounted() {
-    console.log('wrap ref:', this, base)
   }
 }
 </script>
-GameTopbar
 <style lang="less">
 .game-wrap {
   .choose-list {
@@ -67,6 +123,11 @@ GameTopbar
       text-align: center;
       line-height: 60px;
     }
+  }
+
+  .finish-box {
+    display: flex;
+    justify-content: center;
   }
 }
 </style>

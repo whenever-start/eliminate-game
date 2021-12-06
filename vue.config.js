@@ -1,5 +1,5 @@
 module.exports = {
-  publicPath: '/',
+  publicPath: '/eliminate-game',
   outputDir: 'dist',
   assetsDir: 'assets',
   chainWebpack: (config) => {
